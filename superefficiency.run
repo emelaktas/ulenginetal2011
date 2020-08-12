@@ -1,0 +1,54 @@
+reset;
+# select solver
+option solver cplex;
+
+# output width for easy copying to Excel
+option display_width 12;
+
+# superefficiency model
+ model superefficiency.mod;
+ 
+# Ulengin 2011 data;
+data superefficiency.dat;
+
+# country in question
+set DMUanalysedset;
+
+     # record objective function of the country in question
+     param dmu_obj {DMUanalysedset};
+     
+     # record peers of the country
+     param peers {DMUanalysedset, DMUs};
+     
+	 # country iterator
+     let DMUanalysedset := DMUanalysed .. N by 1;
+     
+     # Solve for each country
+     for {a in DMUanalysedset} {
+     
+        # record country for which the model is olved
+        let DMUanalysed := a;
+        
+        # solve model
+        solve;
+        
+        # record objective function value
+        let dmu_obj[a] := eta;
+        
+        # loop to record peers
+        for {j in DMUs} {
+        
+        # peer weights
+        let peers[a,j] := lambda[j];
+       }
+        
+     }   
+                
+# write in to text file        
+display dmu_obj> "superefficiencyresults.txt";
+
+# change output width to write large peer matrix
+option display_width 1000;   
+
+# write peer matrix
+display peers > "superefficiencyresults.txt"; 
